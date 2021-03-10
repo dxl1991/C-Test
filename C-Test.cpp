@@ -84,6 +84,24 @@ void testString()
 	getchar();
 }
 
+void testSet()
+{
+	set<Sprite*> spriteSet;
+	Sprite sprite1 = Sprite(ONE, 1, 2);
+	cout << &sprite1 << endl;
+	Sprite sprite2 = Sprite(ONE, 1, 2);
+	cout << &sprite2 << endl;
+	spriteSet.insert(&sprite1);
+	spriteSet.insert(&sprite1); //会插入失败，相同的地址不能插入
+	spriteSet.insert(&sprite2);
+	set<Sprite*>::iterator it;
+	for (it = spriteSet.begin(); it != spriteSet.end(); it++)
+	{
+		Sprite* sprite = *it;
+		cout << sprite->type << "," << sprite->x << "," << sprite->y<<","<<sprite<<endl;
+	}
+}
+
 
 int main()
 {
@@ -103,9 +121,11 @@ int main()
 		cin >> a;
 		cout << "请输入第二个坐标:" << endl;
 		cin >> b;
-		game.swapSprite(a, b);
+		if (game.swapSprite(a, b))
+		{
+			game.checknoEliminate();
+		}
 	}
-
 	getchar();
 }
 
