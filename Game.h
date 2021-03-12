@@ -2,6 +2,7 @@
 #include <set>
 #include "Sprite.h"
 typedef std::set<Sprite*> SpriteSet; //类型别名
+const bool forbidPlane = true;
 
 class Game
 {
@@ -34,11 +35,12 @@ private:
 	void findEliminateSpriteAll(int x, int y, SpriteSet& spriteSet);
 	void findEliminateSprite(int x, int y, SpriteSet& spriteSet, bool directX);
 	void findEliminateSpriteXY(int x, int y, SpriteSet& spriteSet);
-	void moveSprite(SpriteSet& spriteSet);
+	void moveSprite();
 	bool EliminateSprite(int x, int y, bool useProp,SpriteType type);
 	SpriteType generateProp(SpriteSet& spriteSet);
 	void EliminateSprite1(Sprite* sprite1, Sprite* sprite2);
 	void EliminateSprite2(Sprite* sprite1, Sprite* sprite2);
+	bool EliminateSprite3(Sprite* sprite1, Sprite* sprite2);
 	bool noEliminate();
 	void findPropEliminate(SpriteSet& spriteSet, SpriteType type);
 };

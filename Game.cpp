@@ -48,25 +48,6 @@ Game::~Game()
 	delete[]sprites;
 }
 
-void Game::findEliminateSpriteAll(int x, int y, SpriteSet& spriteSet)
-{
-	bool flag_x = canEliminateX(x, y);
-	bool flag_y = canEliminateY(x, y);
-	bool flag_xy = canEliminateXY(x, y);
-	if (flag_x)
-	{
-		findEliminateSprite(x, y, spriteSet, true);
-	}
-	if (flag_y)
-	{
-		findEliminateSprite(x, y, spriteSet, false);
-	}
-	if (flag_xy)
-	{
-		findEliminateSpriteXY(x, y, spriteSet);
-	}
-}
-
 //消除
 bool Game::EliminateSprite(int x,int y,bool useProp,SpriteType type)
 {
@@ -109,16 +90,8 @@ bool Game::EliminateSprite(int x,int y,bool useProp,SpriteType type)
 		}
 		
 	}
-	spriteSet.clear();
 	print();
-	moveSprite(spriteSet);
-	print();
-	//判断是否可以再消除
-	for (it = spriteSet.begin(); it != spriteSet.end(); it++)
-	{
-		Sprite* sprite = *it;
-		EliminateSprite(sprite->x, sprite->y, false, randomType());
-	}
+	moveSprite();
 	return true;
 }
 //产生特殊元素
@@ -148,14 +121,18 @@ SpriteType Game::generateProp(SpriteSet& spriteSet)
 			yCount[sprite->y] = yCount[sprite->y] + 1;
 		}
 	}
-	if (xCount.size() == 2 && yCount.size() == 2 && spriteSet.size() == 4)
+	if (!forbidPlane)
 	{
-		return PLANE;
+		if (xCount.size() == 2 && yCount.size() == 2 && spriteSet.size() == 4)
+		{
+			return PLANE;
+		}
+		if (((xCount.size() == 2 && yCount.size() == 3) || (xCount.size() == 3 && yCount.size() == 2)) && spriteSet.size() == 5)
+		{
+			return PLANE;
+		}
 	}
-	if (((xCount.size() == 2 && yCount.size() == 3) || (xCount.size() == 3 && yCount.size() == 2)) && spriteSet.size() == 5)
-	{
-		return PLANE;
-	}
+
 	SpriteType spriteType = ZERO;
 	bool three = false;
 	map<int, int>::iterator iter;
@@ -193,7 +170,7 @@ SpriteType Game::generateProp(SpriteSet& spriteSet)
 	}
 	return spriteType;
 }
-//特殊元素交换
+//两个特殊元素交换
 void Game::EliminateSprite1(Sprite* sprite1, Sprite* sprite2)
 {
 	SpriteSet spriteSet;
@@ -305,15 +282,9 @@ void Game::EliminateSprite1(Sprite* sprite1, Sprite* sprite2)
 	this->score += spriteSet.size();
 	spriteSet.clear();
 	print();
-	moveSprite(spriteSet);
-	print();
-	//判断是否可以再消除
-	for (it = spriteSet.begin(); it != spriteSet.end(); it++)
-	{
-		Sprite* sprite = *it;
-		EliminateSprite(sprite->x, sprite->y, false, randomType());
-	}
+	moveSprite();
 }
+//一个特殊元素和一个普通元素交换
 void Game::EliminateSprite2(Sprite* sprite1, Sprite* sprite2)
 {
 	int x = sprite1->type <= FIVE ? sprite1->x : sprite2->x;
@@ -359,16 +330,74 @@ void Game::EliminateSprite2(Sprite* sprite1, Sprite* sprite2)
 		sprite->type = ZERO;
 	}
 	this->score += spriteSet2.size();
-	spriteSet2.clear();
 	print();
-	moveSprite(spriteSet2);
-	print();
-	//判断是否可以再消除
-	for (it = spriteSet2.begin(); it != spriteSet2.end(); it++)
+	moveSprite();
+}
+
+//两个普通元素交换
+bool Game::EliminateSprite3(Sprite* sprite1, Sprite* sprite2)
+{
+	bool flag = false;
+	SpriteSet spriteSet1;
+	findEliminateSpriteAll(sprite1->x, sprite1->y, spriteSet1);
+	if (spriteSet1.size() > 0)
 	{
-		Sprite* sprite = *it;
-		EliminateSprite(sprite->x, sprite->y, false, randomType());
+		flag = true;
+		SpriteSet::iterator it;
+		for (it = spriteSet1.begin(); it != spriteSet1.end(); it++)
+		{
+			Sprite* sprite = *it;
+			sprite->type = ZERO;
+		}
+		this->score += spriteSet1.size();
+		SpriteType spriteType = generateProp(spriteSet1);
+		if (spriteType > FIVE)
+		{
+			sprites[sprite1->x][sprite1->y].type = spriteType;
+			if (propStatistics.find(spriteType) == propStatistics.end())
+			{
+				propStatistics[spriteType] = 1;
+			}
+			else
+			{
+				propStatistics[spriteType] = propStatistics[spriteType] + 1;
+			}
+		}
 	}
+
+	SpriteSet spriteSet2;
+	findEliminateSpriteAll(sprite2->x, sprite2->y, spriteSet2);
+	if (spriteSet2.size() > 0)
+	{
+		flag = true;
+		SpriteSet::iterator it;
+		for (it = spriteSet2.begin(); it != spriteSet2.end(); it++)
+		{
+			Sprite* sprite = *it;
+			sprite->type = ZERO;
+		}
+		this->score += spriteSet2.size();
+		SpriteType spriteType = generateProp(spriteSet2);
+		if (spriteType > FIVE)
+		{
+			sprites[sprite2->x][sprite2->y].type = spriteType;
+			if (propStatistics.find(spriteType) == propStatistics.end())
+			{
+				propStatistics[spriteType] = 1;
+			}
+			else
+			{
+				propStatistics[spriteType] = propStatistics[spriteType] + 1;
+			}
+		}
+	}
+	if (!flag)
+	{
+		return false;
+	}
+	print();
+	moveSprite();
+	return true;
 }
 
 //坐标交换
@@ -418,83 +447,37 @@ bool Game::swapSprite(int a, int b)
 			return true;
 		}
 		//两个普通元素交换
-		bool flag = false;
-		SpriteSet spriteSet1;
-		findEliminateSpriteAll(x1, y1, spriteSet1);
-		if (spriteSet1.size() > 0)
-		{
-			flag = true;
-			SpriteSet::iterator it;
-			for (it = spriteSet1.begin(); it != spriteSet1.end(); it++)
-			{
-				Sprite* sprite = *it;
-				sprite->type = ZERO;
-			}
-			this->score += spriteSet1.size();
-			SpriteType spriteType = generateProp(spriteSet1);
-			if (spriteType > FIVE)
-			{
-				sprites[x1][y1].type = spriteType;
-				if (propStatistics.find(spriteType) == propStatistics.end())
-				{
-					propStatistics[spriteType] = 1;
-				}
-				else
-				{
-					propStatistics[spriteType] = propStatistics[spriteType] + 1;
-				}
-			}
-		}
-
-		SpriteSet spriteSet2;
-		findEliminateSpriteAll(x2, y2, spriteSet2);
-		if (spriteSet2.size() > 0)
-		{
-			flag = true;
-			SpriteSet::iterator it;
-			for (it = spriteSet2.begin(); it != spriteSet2.end(); it++)
-			{
-				Sprite* sprite = *it;
-				sprite->type = ZERO;
-			}
-			this->score += spriteSet2.size();
-			SpriteType spriteType = generateProp(spriteSet2);
-			if (spriteType > FIVE)
-			{
-				sprites[x2][y2].type = spriteType;
-				if (propStatistics.find(spriteType) == propStatistics.end())
-				{
-					propStatistics[spriteType] = 1;
-				}
-				else
-				{
-					propStatistics[spriteType] = propStatistics[spriteType] + 1;
-				}
-			}
-		}
-		if (!flag)
+		if (!EliminateSprite3(&sprites[x1][y1], &sprites[x2][y2]))
 		{
 			sprites[x2][y2].type = sprites[x1][y1].type;
 			sprites[x1][y1].type = temp;
 			cout << "坐标交换后没什么变化" << endl;
 			return false;
 		}
-		SpriteSet spriteSet;
-		print();
-		moveSprite(spriteSet);
-		print();
-		SpriteSet::iterator it;
-		//判断是否可以再消除
-		for (it = spriteSet.begin(); it != spriteSet.end(); it++)
-		{
-			Sprite* sprite = *it;
-			EliminateSprite(sprite->x, sprite->y, false, randomType());
-		}
 	}
 	else
 	{
 		cout << "只有相邻的坐标才能交换" << endl;
 		return false;
+	}
+}
+//收集周围能消除的元素
+void Game::findEliminateSpriteAll(int x, int y, SpriteSet& spriteSet)
+{
+	bool flag_x = canEliminateX(x, y);
+	bool flag_y = canEliminateY(x, y);
+	bool flag_xy = canEliminateXY(x, y);
+	if (flag_x)
+	{
+		findEliminateSprite(x, y, spriteSet, true);
+	}
+	if (flag_y)
+	{
+		findEliminateSprite(x, y, spriteSet, false);
+	}
+	if (flag_xy)
+	{
+		findEliminateSpriteXY(x, y, spriteSet);
 	}
 }
 //收集田字元素
@@ -601,6 +584,10 @@ void Game::findEliminateSprite(int x, int y,SpriteSet& spriteSet,bool directX)
 //田字能否消除
 bool Game::canEliminateXY(int x, int y)
 {
+	if (forbidPlane)
+	{
+		return false;
+	}
 	Sprite self = sprites[x][y];
 	Sprite* upSprite = getUpSprite(x, y);
 	Sprite* downSprite = getDownSprite(x, y);
@@ -705,8 +692,9 @@ bool Game::canEliminateX(int x, int y)
 	return false;
 }
 //元素下落
-void Game::moveSprite(SpriteSet& spriteSet)
+void Game::moveSprite()
 {
+	SpriteSet spriteSet;
 	for (int i = _X - 1; i >= 0; i--)
 	{
 		for (int j = 0; j < _Y; j++)
@@ -733,6 +721,14 @@ void Game::moveSprite(SpriteSet& spriteSet)
 				}
 			}
 		}
+	}
+	print();
+	SpriteSet::iterator it;
+	//判断是否可以再消除
+	for (it = spriteSet.begin(); it != spriteSet.end(); it++)
+	{
+		Sprite* sprite = *it;
+		EliminateSprite(sprite->x, sprite->y, false, randomType());
 	}
 }
 //是否没有可消除的了
