@@ -2,12 +2,14 @@
 //
 
 #include <iostream>
+#include <time.h>
 #include "Line.h"
 #include "TestMap.h"
 #include "TestTemplate.h"
 #include "TestThread.h"
 #include "Game.h"
-#define  abc 1024
+#define  abc 1024 //宏定义，文本替换
+typedef std::map<std::string, std::string> StringMap; //类型别名
 using namespace std;
 
 static int objectCount;
@@ -130,18 +132,55 @@ int main()
 	//TestThread testThread;
 	//testThread.test1();
 	//testRefrence();
-	int a, b;
-	Game game;
-	while (true)
+	int x, y;
+	cout << "请输入棋盘行数:" << endl;
+	cin >> x;
+	cout << "请输入棋盘列数:" << endl;
+	cin >> y;
+	int gameType;
+	cout << "选择游戏模式，1：自动消除，2：手动消除" << endl;
+	cin >> gameType;
+	if (gameType == 1)
 	{
-		cout << endl;
-		cout << "请输入第一个坐标:" << endl;
-		cin >> a;
-		cout << "请输入第二个坐标:" << endl;
-		cin >> b;
-		if (game.swapSprite(a, b))
+		int count;
+		cout << "请输入自动交换坐标次数：" << endl;
+		cin >> count;
+		time_t startTime = time(NULL);
+		int a, b, temp;
+		temp = count;
+		Game game(x,y);
+		while (count > 0)
 		{
-			game.checknoEliminate();
+			count--;
+			game.findSuggest(a, b);
+			cout << "第"<< temp - count<<"次交换坐标：" << a << "," << b << endl;
+			if (game.swapSprite(a, b))
+			{
+				game.checknoEliminate();
+			}
+		}
+		time_t endTime = time(NULL);
+		cout << "棋盘大小："<<x<<","<<y<<" 一共交换了" << temp << "次元素,获得积分:" << game.score <<",消耗时间："<<endTime - startTime<<"秒"<< endl;
+		game.printPropStatistics();
+		getchar();
+	}
+	else 
+	{
+		int a, b, c, d;
+		Game game(x, y);
+		while (true)
+		{
+			cout << endl;
+			game.findSuggest(c, d);
+			cout << "交换建议：" << c << "," << d << endl;
+			cout << "请输入第一个坐标:" << endl;
+			cin >> a;
+			cout << "请输入第二个坐标:" << endl;
+			cin >> b;
+			if (game.swapSprite(a, b))
+			{
+				game.checknoEliminate();
+			}
 		}
 	}
 	getchar();
