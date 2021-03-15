@@ -8,8 +8,8 @@ enum SpriteType : int
 	FOUR = 4,
 	FIVE = 5,
 	ALL = 6,
-	ALL_X = 7,
-	ALL_Y = 8,
-	BOOM = 9,
+	BOOM = 7,
+	ALL_X = 8,
+	ALL_Y = 9,
 	PLANE = 10,
 };

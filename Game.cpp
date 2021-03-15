@@ -10,17 +10,12 @@ Game::Game()
 {
 	Game(6,6);
 }
-Game::Game(int x,int y)
+Game::Game(int x,int y) : score(0)
 {
 	_X = x;
 	_Y = y;
-	score = 0;
-	sprites = new Sprite * [_X];
+	sprites = new_Array2D<Sprite>(_X, _Y);
 	srand((int)time(0));
-	for (int i = 0; i < _X; i++)
-	{
-		sprites[i] = new Sprite[_Y];
-	}
 	do
 	{
 		for (int i = 0; i < _X; i++)
@@ -41,11 +36,7 @@ Game::~Game()
 {
 	delete NULL_SPRITE;
 	NULL_SPRITE = NULL;
-	for (int i = 0; i < _X; i++)
-	{
-		delete[]sprites[i];
-	}
-	delete[]sprites;
+	delete_Array2D<Sprite>(sprites, _X, _Y);
 }
 
 //消除
@@ -1194,7 +1185,7 @@ void printColor(SpriteType type) {
 	}
 }
 
-void Game::print()
+void Game::print() const
 {
 	cout << endl << "当前分数: " << score << endl;
 	for (int i=0;i < _X;i++)
@@ -1203,7 +1194,27 @@ void Game::print()
 		for (int j=0;j < _Y;j++)
 		{
 			printColor(sprites[i][j].type);
-			cout << " " << sprites[i][j].type;
+			switch (sprites[i][j].type)
+			{
+			case ALL:
+				cout << " A";
+				break;
+			case BOOM:
+				cout << " B";
+				break;
+			case ALL_X:
+				cout << " X";
+				break;
+			case ALL_Y:
+				cout << " Y";
+				break;
+			case PLANE:
+				cout << " P";
+				break;
+			default:
+				cout << " " << sprites[i][j].type;
+				break;
+			}
 			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_RED |
 				FOREGROUND_GREEN | FOREGROUND_BLUE);
 		}
@@ -1218,11 +1229,11 @@ void Game::printHelpInfo()
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN);
 	cout << "1到5代表5种基础元素，可横向、纵向、田字消除，每消除一个元素获得一分" << endl;
 	cout << "特殊元素：" << endl;
-	cout << "6：相同元素全消" << endl;
-	cout << "7：横向元素全消" << endl;
-	cout << "8：纵向元素全消" << endl;
-	cout << "9：炸弹，消3x3田字区域" << endl;
-	cout << "10：飞机，消十字星区域" << endl;
+	cout << "A：相同元素全消" << endl;
+	cout << "B：炸弹，消3x3田字区域" << endl;
+	cout << "X：横向元素全消" << endl;
+	cout << "Y：纵向元素全消" << endl;
+	cout << "P：飞机，消十字星区域" << endl;
 	cout << "0：已消除的元素" << endl;
 	cout << "操作方式：" << endl;
 	cout << "这是个" << _X << "行" << _Y << "列的矩阵" << endl;
@@ -1236,14 +1247,14 @@ void Game::printHelpInfo()
 void Game::printPropStatistics()
 {
 	int all = propStatistics.find(ALL) == propStatistics.end() ? 0 : propStatistics[ALL];
+	int boom = propStatistics.find(BOOM) == propStatistics.end() ? 0 : propStatistics[BOOM];
 	int all_x = propStatistics.find(ALL_X) == propStatistics.end() ? 0 : propStatistics[ALL_X];
 	int all_y = propStatistics.find(ALL_Y) == propStatistics.end() ? 0 : propStatistics[ALL_Y];
-	int boom = propStatistics.find(BOOM) == propStatistics.end() ? 0 : propStatistics[BOOM];
 	int plane = propStatistics.find(PLANE) == propStatistics.end() ? 0 : propStatistics[PLANE];
 	cout << "生成道具统计：" << endl;
-	cout << "all：" << all << endl;
-	cout << "all_x：" << all_x << endl;
-	cout << "all_y：" << all_y << endl;
-	cout << "boom：" << boom << endl;
-	cout << "plane：" << plane << endl;
+	cout << "A：" << all << endl;
+	cout << "B：" << boom << endl;
+	cout << "X：" << all_x << endl;
+	cout << "Y：" << all_y << endl;
+	cout << "P：" << plane << endl;
 }

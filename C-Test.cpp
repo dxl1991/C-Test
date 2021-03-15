@@ -8,6 +8,7 @@
 #include "TestTemplate.h"
 #include "TestThread.h"
 #include "Game.h"
+#include "TestClass.h"
 #define  abc 1024 //宏定义，文本替换
 typedef std::map<std::string, std::string> StringMap; //类型别名
 using namespace std;
@@ -122,6 +123,33 @@ void testRefrence()
 	cout << rc << endl; //这是错误的，不知道会发生什么
 }
 
+void test1() {
+	TestClass* testClass;
+	MyClass myClass; //先调用父类的构造函数
+	testClass = &myClass;
+	testClass->print();  //调用父类的
+	testClass->printV(); //调用基类的
+}
+
+void test2() {
+	char* p;
+	char** pp;
+	long* l;
+	int* i;
+
+	p = (char*)100;
+	pp = (char**)100;
+	l = (long*)100;
+	i = (int*)100;
+
+	p++;
+	pp++; //64位系统，会加8
+	l++;
+	i++;
+
+	printf("p=%d,pp=%d,l=%d,i=%d\n", p,pp,l,i);
+}
+
 int main()
 {
 	//testLine();
@@ -132,6 +160,7 @@ int main()
 	//TestThread testThread;
 	//testThread.test1();
 	//testRefrence();
+	test2();
 	int x, y;
 	cout << "请输入棋盘行数:" << endl;
 	cin >> x;

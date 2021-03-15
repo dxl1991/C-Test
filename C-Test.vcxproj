@@ -143,6 +143,7 @@
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Line.cpp" />
     <ClCompile Include="Sprite.cpp" />
+    <ClCompile Include="TestClass.cpp" />
     <ClCompile Include="TestMap.cpp" />
     <ClCompile Include="TestTemplate.cpp" />
     <ClCompile Include="TestThread.cpp" />
@@ -152,6 +153,7 @@
     <ClInclude Include="Line.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="SpriteType.h" />
+    <ClInclude Include="TestClass.h" />
     <ClInclude Include="TestMap.h" />
     <ClInclude Include="TestTemplate.h" />
     <ClInclude Include="TestThread.h" />

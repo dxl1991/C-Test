@@ -1,8 +1,10 @@
 
 #include <set>
+#include <map>
 #include "Sprite.h"
+
 typedef std::set<Sprite*> SpriteSet; //类型别名
-const bool forbidPlane = true;
+const bool forbidPlane = false;
 
 class Game
 {
@@ -23,7 +25,7 @@ public:
 	int _Y;
 private:
 	Sprite** sprites;
-	void print();
+	void print() const; //方法后面跟const，此方法不能修改成员变量的值
 	void printHelpInfo();
 	bool canEliminateY(int x, int y);
 	bool canEliminateX(int x, int y);
@@ -44,4 +46,34 @@ private:
 	bool noEliminate();
 	void findPropEliminate(SpriteSet& spriteSet, SpriteType type);
 };
+
+template <typename T>
+T** new_Array2D(int row, int col)
+{
+	int size = sizeof(T);
+	int point_size = sizeof(T*);
+	//先申请内存，其中sizeof(T*) * row表示存放row个行指针
+	T** arr = (T**)malloc(point_size * row + size * row * col);
+	if (arr != NULL)
+	{
+		T* head = (T*)((int)arr + point_size * row);
+		for (int i = 0; i < row; ++i)
+		{
+			arr[i] = (T*)((int)head + i * col * size);
+			for (int j = 0; j < col; ++j)
+				new (&arr[i][j]) T;
+		}
+	}
+	return (T**)arr;
+}
+//释放二维数组
+template <typename T>
+void delete_Array2D(T** arr, int row, int col)
+{
+	for (int i = 0; i < row; ++i)
+		for (int j = 0; j < col; ++j)
+			arr[i][j].~T();
+	if (arr != NULL)
+		free((void**)arr);
+}
 
