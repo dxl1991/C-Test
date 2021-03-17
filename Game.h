@@ -35,7 +35,7 @@ private:
 	Sprite* getLeftSprite(int x, int y);
 	Sprite* getRightSprite(int x, int y);
 	void findEliminateSpriteAll(int x, int y, SpriteSet& spriteSet);
-	void findEliminateSprite(int x, int y, SpriteSet& spriteSet, bool directX);
+	void findEliminateSprite(int x, int y, SpriteSet& spriteSet, bool directX, int direct);
 	void findEliminateSpriteXY(int x, int y, SpriteSet& spriteSet);
 	void moveSprite();
 	bool EliminateSprite(int x, int y, bool useProp,SpriteType type);

@@ -7,9 +7,9 @@ using namespace std;
 
 Game::Game()
 {
-	Game(6,6);
+	Game(6, 6);
 }
-Game::Game(int x,int y) : score(0)
+Game::Game(int x, int y) : score(0)
 {
 	_X = x;
 	_Y = y;
@@ -35,7 +35,7 @@ Game::Game(int x,int y) : score(0)
 	printHelpInfo();
 	print();
 }
-Game::~Game() 
+Game::~Game()
 {
 	delete NULL_SPRITE;
 	NULL_SPRITE = NULL;
@@ -47,10 +47,10 @@ Game::~Game()
 }
 
 //消除
-bool Game::EliminateSprite(int x,int y,bool useProp,SpriteType type)
+bool Game::EliminateSprite(int x, int y, bool useProp, SpriteType type)
 {
 	SpriteSet spriteSet;
-	findEliminateSpriteAll(x,y,spriteSet);
+	findEliminateSpriteAll(x, y, spriteSet);
 	bool prop = false;
 	if (sprites[x][y].type > FIVE && useProp)
 	{
@@ -65,7 +65,7 @@ bool Game::EliminateSprite(int x,int y,bool useProp,SpriteType type)
 	SpriteSet spriteSetTemp = spriteSet;
 	if (prop)
 	{
-	   findPropEliminate(spriteSet,type);
+		findPropEliminate(spriteSet, type);
 	}
 	SpriteSet::iterator it;
 	for (it = spriteSet.begin(); it != spriteSet.end(); it++)
@@ -86,7 +86,7 @@ bool Game::EliminateSprite(int x,int y,bool useProp,SpriteType type)
 		{
 			propStatistics[spriteType] = propStatistics[spriteType] + 1;
 		}
-		
+
 	}
 	return true;
 }
@@ -175,12 +175,12 @@ void Game::EliminateSprite1(Sprite* sprite1, Sprite* sprite2)
 	if ((sprite1->type == ALL && sprite2->type != ALL) || (sprite1->type != ALL && sprite2->type == ALL))
 	{
 		SpriteType type;
-		if (sprite1->type ==ALL)
+		if (sprite1->type == ALL)
 		{
 			sprite1->type = ZERO;
 			type = sprite2->type;
 		}
-		else 
+		else
 		{
 			sprite2->type = ZERO;
 			type = sprite1->type;
@@ -204,10 +204,10 @@ void Game::EliminateSprite1(Sprite* sprite1, Sprite* sprite2)
 	if ((sprite1->type == BOOM && (sprite2->type == ALL_X || sprite2->type == ALL_Y)) || (sprite2->type == BOOM && (sprite1->type == ALL_X || sprite1->type == ALL_Y)))
 	{
 		int min_x, max_x, min_y, max_y;
-		min_x = max(sprite2->x - 1,0);
-		max_x = min(sprite2->x + 1, _X-1);
+		min_x = max(sprite2->x - 1, 0);
+		max_x = min(sprite2->x + 1, _X - 1);
 		min_y = max(sprite2->y - 1, 0);
-		max_y = min(sprite2->y + 1, _Y-1);
+		max_y = min(sprite2->y + 1, _Y - 1);
 		for (int i = min_x; i <= max_x; i++)
 		{
 			for (int j = 0; j < _Y; j++)
@@ -279,9 +279,9 @@ void Game::EliminateSprite2(Sprite* sprite1, Sprite* sprite2)
 	if (sprite1->type > FIVE)
 	{
 		spriteSet2.insert(sprite1);
-	    findPropEliminate(spriteSet2, sprite2->type);
+		findPropEliminate(spriteSet2, sprite2->type);
 	}
-	else 
+	else
 	{
 		spriteSet2.insert(sprite2);
 		findPropEliminate(spriteSet2, sprite1->type);
@@ -405,9 +405,9 @@ bool Game::swapSprite(int a, int b)
 	//双击
 	if (a == b)
 	{
-		if (sprites[x1][y1].type > FIVE)
+		if (sprites[x1][y1].type > FIVE && sprites[x1][y1].type != ALL)
 		{
-			EliminateSprite(x1, y1, true,randomType());
+			EliminateSprite(x1, y1, true, randomType());
 			print();
 			moveSprite();
 			return true;
@@ -442,6 +442,7 @@ bool Game::swapSprite(int a, int b)
 			cout << "坐标交换后没什么变化" << endl;
 			return false;
 		}
+		return true;
 	}
 	else
 	{
@@ -457,11 +458,11 @@ void Game::findEliminateSpriteAll(int x, int y, SpriteSet& spriteSet)
 	bool flag_xy = canEliminateXY(x, y);
 	if (flag_x)
 	{
-		findEliminateSprite(x, y, spriteSet, true);
+		findEliminateSprite(x, y, spriteSet, true, 0);
 	}
 	if (flag_y)
 	{
-		findEliminateSprite(x, y, spriteSet, false);
+		findEliminateSprite(x, y, spriteSet, false, 0);
 	}
 	if (flag_xy)
 	{
@@ -529,42 +530,45 @@ void Game::findEliminateSpriteXY(int x, int y, SpriteSet& spriteSet)
 	}
 }
 //收集同一方向，相邻且值一样的元素
-void Game::findEliminateSprite(int x, int y,SpriteSet& spriteSet,bool directX)
+void Game::findEliminateSprite(int x, int y, SpriteSet& spriteSet, bool directX, int direct)
 {
-	Sprite self = sprites[x][y];
+	Sprite* self = &sprites[x][y];
 	Sprite* upSprite = getUpSprite(x, y);
 	Sprite* downSprite = getDownSprite(x, y);
 	Sprite* leftSprite = getLeftSprite(x, y);
 	Sprite* rightSprite = getRightSprite(x, y);
-
-    //找竖向相同的
+	if (direct == 0)
+	{
+		spriteSet.insert(self);
+	}
+	//找竖向相同的
 	if (!directX)
 	{
-		if (upSprite->type != ZERO && upSprite->type == self.type && spriteSet.find(upSprite) == spriteSet.end())
+		if (upSprite->type != ZERO && upSprite->type == self->type && spriteSet.find(upSprite) == spriteSet.end() && (direct == 0 || direct == 1))
 		{
 			spriteSet.insert(upSprite);
-			findEliminateSprite(upSprite->x, upSprite->y, spriteSet,false);
+			findEliminateSprite(upSprite->x, upSprite->y, spriteSet, false, 1);
 		}
 
-		if (downSprite->type != ZERO && downSprite->type == self.type && spriteSet.find(downSprite) == spriteSet.end())
+		if (downSprite->type != ZERO && downSprite->type == self->type && spriteSet.find(downSprite) == spriteSet.end() && (direct == 0 || direct == 2))
 		{
 			spriteSet.insert(downSprite);
-			findEliminateSprite(downSprite->x, downSprite->y, spriteSet, false);
+			findEliminateSprite(downSprite->x, downSprite->y, spriteSet, false, 2);
 		}
 	}
-	else 
+	else
 	{
 		//找横向相同的
-		if (leftSprite->type != ZERO && leftSprite->type == self.type && spriteSet.find(leftSprite) == spriteSet.end())
+		if (leftSprite->type != ZERO && leftSprite->type == self->type && spriteSet.find(leftSprite) == spriteSet.end() && (direct == 0 || direct == 1))
 		{
 			spriteSet.insert(leftSprite);
-			findEliminateSprite(leftSprite->x, leftSprite->y, spriteSet,true);
+			findEliminateSprite(leftSprite->x, leftSprite->y, spriteSet, true, 1);
 		}
 
-		if (rightSprite->type != ZERO && rightSprite->type == self.type && spriteSet.find(rightSprite) == spriteSet.end())
+		if (rightSprite->type != ZERO && rightSprite->type == self->type && spriteSet.find(rightSprite) == spriteSet.end() && (direct == 0 || direct == 2))
 		{
 			spriteSet.insert(rightSprite);
-			findEliminateSprite(rightSprite->x, rightSprite->y, spriteSet, true);
+			findEliminateSprite(rightSprite->x, rightSprite->y, spriteSet, true, 2);
 		}
 	}
 }
@@ -623,7 +627,7 @@ bool Game::canEliminateXY(int x, int y)
 }
 
 //竖向能否消除
-bool Game::canEliminateY(int x,int y)
+bool Game::canEliminateY(int x, int y)
 {
 	Sprite self = sprites[x][y];
 	Sprite* upSprite = getUpSprite(x, y);
@@ -679,7 +683,7 @@ bool Game::canEliminateX(int x, int y)
 	}
 	return false;
 }
-SpriteType Game::tryEliminate(int x, int y) 
+SpriteType Game::tryEliminate(int x, int y)
 {
 	SpriteSet spriteSet;
 	findEliminateSpriteAll(x, y, spriteSet);
@@ -698,7 +702,7 @@ bool Game::EliminateSprite(SpriteSet& spriteSet)
 	{
 		Sprite* sprite = *it;
 		SpriteType type = tryEliminate(sprite->x, sprite->y);
-		sortSet.insert(new Sprite(type,sprite->x, sprite->y));
+		sortSet.insert(new Sprite(type, sprite->x, sprite->y));
 	}
 	for (it = sortSet.begin(); it != sortSet.end(); it++)
 	{
@@ -726,7 +730,7 @@ void Game::moveSprite()
 				{
 					tempX--;
 				}
-				
+
 				if (tempX >= 0 && sprites[tempX][j].type != ZERO)
 				{
 					sprites[i][j].type = sprites[tempX][j].type;
@@ -734,7 +738,7 @@ void Game::moveSprite()
 					spriteSet.insert(&sprites[i][j]);
 					spriteSet.insert(&sprites[tempX][j]);
 				}
-				else 
+				else
 				{
 					sprites[i][j].type = randomWightType();
 					spriteSet.insert(&sprites[i][j]);
@@ -752,9 +756,9 @@ void Game::moveSprite()
 //是否没有可消除的了
 bool Game::noEliminate()
 {
-	for (int i=0;i<_X;i++)
+	for (int i = 0; i < _X; i++)
 	{
-		for (int j=0;j<_Y;j++)
+		for (int j = 0; j < _Y; j++)
 		{
 			if (sprites[i][j].type > FIVE)
 			{
@@ -767,7 +771,7 @@ bool Game::noEliminate()
 				SpriteType tempType = sprites[i][j].type;
 				sprites[i][j].type = downSprite->type;
 				downSprite->type = tempType;
-				if (canEliminateX(i, j) || canEliminateY(i, j) || canEliminateXY(i, j) || 
+				if (canEliminateX(i, j) || canEliminateY(i, j) || canEliminateXY(i, j) ||
 					canEliminateX(downSprite->x, downSprite->y) || canEliminateY(downSprite->x, downSprite->y) || canEliminateXY(downSprite->x, downSprite->y))
 				{
 					downSprite->type = sprites[i][j].type;
@@ -807,25 +811,51 @@ void Game::findSuggest(int& a, int& b)
 	{
 		for (int j = _Y - 1; j >= 0; j--)
 		{
+			Sprite* upSprite = getUpSprite(i, j);
 			Sprite* downSprite = getDownSprite(i, j);
+			Sprite* leftSprite = getLeftSprite(i, j);
 			Sprite* rightSprite = getRightSprite(i, j);
 			if (sprites[i][j].type > FIVE)
 			{
-				if (a == 0 && b == 0)
+				a = i * _Y + j + 1;
+				b = i * _Y + j + 1;
+				if (sprites[i][j].type == ALL)
 				{
-					a = i * _Y + j + 1;
-					b = i * _Y + j + 1;
-					if (downSprite->type > FIVE)
+					if (downSprite->type > ZERO)
 					{
 						b = downSprite->x * _Y + downSprite->y + 1;
 					}
-					if (rightSprite->type > FIVE)
+					if (rightSprite->type > ZERO)
 					{
 						b = rightSprite->x * _Y + rightSprite->y + 1;
 					}
-					propEliminate = true;
+					if (upSprite->type > ZERO)
+					{
+						b = upSprite->x * _Y + upSprite->y + 1;
+					}
+					if (leftSprite->type > ZERO)
+					{
+						b = leftSprite->x * _Y + leftSprite->y + 1;
+					}
 				}
-				continue;
+				if (downSprite->type > FIVE)
+				{
+					b = downSprite->x * _Y + downSprite->y + 1;
+				}
+				if (rightSprite->type > FIVE)
+				{
+					b = rightSprite->x * _Y + rightSprite->y + 1;
+				}
+				if (upSprite->type > FIVE)
+				{
+					b = upSprite->x * _Y + upSprite->y + 1;
+				}
+				if (leftSprite->type > FIVE)
+				{
+					b = leftSprite->x * _Y + leftSprite->y + 1;
+				}
+				propEliminate = true;
+				return;
 			}
 			if (downSprite->type > ZERO && downSprite->type <= FIVE)
 			{
@@ -838,11 +868,11 @@ void Game::findSuggest(int& a, int& b)
 				SpriteSet spriteSet;
 				if (flag_x)
 				{
-					findEliminateSprite(i, j, spriteSet, true);
+					findEliminateSprite(i, j, spriteSet, true, 0);
 				}
 				if (flag_y)
 				{
-					findEliminateSprite(i, j, spriteSet, false);
+					findEliminateSprite(i, j, spriteSet, false, 0);
 				}
 				if (flag_xy)
 				{
@@ -870,11 +900,11 @@ void Game::findSuggest(int& a, int& b)
 				spriteSet.clear();
 				if (flag_x)
 				{
-					findEliminateSprite(downSprite->x, downSprite->y, spriteSet, true);
+					findEliminateSprite(downSprite->x, downSprite->y, spriteSet, true, 0);
 				}
 				if (flag_y)
 				{
-					findEliminateSprite(downSprite->x, downSprite->y, spriteSet, false);
+					findEliminateSprite(downSprite->x, downSprite->y, spriteSet, false, 0);
 				}
 				if (flag_xy)
 				{
@@ -910,11 +940,11 @@ void Game::findSuggest(int& a, int& b)
 				SpriteSet spriteSet;
 				if (flag_x)
 				{
-					findEliminateSprite(i, j, spriteSet, true);
+					findEliminateSprite(i, j, spriteSet, true, 0);
 				}
 				if (flag_y)
 				{
-					findEliminateSprite(i, j, spriteSet, false);
+					findEliminateSprite(i, j, spriteSet, false, 0);
 				}
 				if (flag_xy)
 				{
@@ -942,11 +972,11 @@ void Game::findSuggest(int& a, int& b)
 				spriteSet.clear();
 				if (flag_x)
 				{
-					findEliminateSprite(rightSprite->x, rightSprite->y, spriteSet, true);
+					findEliminateSprite(rightSprite->x, rightSprite->y, spriteSet, true, 0);
 				}
 				if (flag_y)
 				{
-					findEliminateSprite(rightSprite->x, rightSprite->y, spriteSet, false);
+					findEliminateSprite(rightSprite->x, rightSprite->y, spriteSet, false, 0);
 				}
 				if (flag_xy)
 				{
@@ -975,7 +1005,7 @@ void Game::findSuggest(int& a, int& b)
 	}
 }
 
-void Game::findPropEliminate(SpriteSet& spriteSet,SpriteType type)
+void Game::findPropEliminate(SpriteSet& spriteSet, SpriteType type)
 {
 	bool prop = true;
 	while (prop)
@@ -1103,7 +1133,7 @@ void Game::findPropEliminate(SpriteSet& spriteSet,SpriteType type)
 	}
 }
 
-void Game::checknoEliminate() 
+void Game::checknoEliminate()
 {
 	if (noEliminate())
 	{
@@ -1182,7 +1212,7 @@ SpriteType Game::randomWightType()
 				{
 					spriteTypeCount[type] = 1;
 				}
-				else 
+				else
 				{
 					spriteTypeCount[type] = spriteTypeCount[type] + 1;
 				}
@@ -1253,10 +1283,10 @@ void printColor(SpriteType type) {
 void Game::print() const
 {
 	cout << endl << "当前分数: " << score << endl;
-	for (int i=0;i < _X;i++)
+	for (int i = 0; i < _X; i++)
 	{
 		cout << endl;
-		for (int j=0;j < _Y;j++)
+		for (int j = 0; j < _Y; j++)
 		{
 			printColor(sprites[i][j].type);
 			switch (sprites[i][j].type)
