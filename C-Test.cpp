@@ -160,7 +160,7 @@ int main()
 	//TestThread testThread;
 	//testThread.test1();
 	//testRefrence();
-	test2();
+	//test2();
 	int x, y;
 	cout << "请输入棋盘行数:" << endl;
 	cin >> x;

@@ -13,6 +13,10 @@ public:
 	}
 	bool operator < (const Sprite& _A) const
 	{
+		return _A.type < type;
+	}
+	/*bool operator < (const Sprite& _A) const
+	{
 		if (x < _A.x)
 		{
 			return true;
@@ -29,7 +33,7 @@ public:
 			}
 		}
 		return false;
-	}
+	}*/
 };
 
 

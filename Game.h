@@ -4,7 +4,7 @@
 #include "Sprite.h"
 
 typedef std::set<Sprite*> SpriteSet; //类型别名
-const bool forbidPlane = false;
+const bool forbidPlane = true;
 
 class Game
 {
@@ -39,12 +39,14 @@ private:
 	void findEliminateSpriteXY(int x, int y, SpriteSet& spriteSet);
 	void moveSprite();
 	bool EliminateSprite(int x, int y, bool useProp,SpriteType type);
+	bool EliminateSprite(SpriteSet& spriteSet);
 	SpriteType generateProp(SpriteSet& spriteSet);
 	void EliminateSprite1(Sprite* sprite1, Sprite* sprite2);
 	void EliminateSprite2(Sprite* sprite1, Sprite* sprite2);
 	bool EliminateSprite3(Sprite* sprite1, Sprite* sprite2);
 	bool noEliminate();
 	void findPropEliminate(SpriteSet& spriteSet, SpriteType type);
+	SpriteType tryEliminate(int x,int y);
 };
 
 template <typename T>
@@ -53,15 +55,15 @@ T** new_Array2D(int row, int col)
 	int size = sizeof(T);
 	int point_size = sizeof(T*);
 	//先申请内存，其中sizeof(T*) * row表示存放row个行指针
-	T** arr = (T**)malloc(point_size * row + size * row * col);
+	T** arr = (T**)malloc(size * row * col);
 	if (arr != NULL)
 	{
-		T* head = (T*)((int)arr + point_size * row);
+		T* head = (T*)((int)arr);
 		for (int i = 0; i < row; ++i)
 		{
 			arr[i] = (T*)((int)head + i * col * size);
-			for (int j = 0; j < col; ++j)
-				new (&arr[i][j]) T;
+			//for (int j = 0; j < col; ++j)
+				//new (&arr[i][j]) T;
 		}
 	}
 	return (T**)arr;
