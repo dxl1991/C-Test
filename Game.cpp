@@ -14,7 +14,8 @@ Game::Game(int x, int y) : score(0)
 	_X = x;
 	_Y = y;
 	sprites = new Sprite * [_X];
-	srand((int)time(0));
+	seed = (int)time(0);
+	csRandom = new CSRandom(seed);
 	for (int i = 0; i < _X; i++)
 	{
 		sprites[i] = new Sprite[_Y];
@@ -44,13 +45,14 @@ Game::~Game()
 		delete[] sprites[i];
 	}
 	delete[] sprites;
+	delete csRandom;
 }
 
 //消除
 bool Game::EliminateSprite(int x, int y, bool useProp, SpriteType type)
 {
 	SpriteSet spriteSet;
-	findEliminateSpriteAll(x, y, spriteSet);
+	findEliminateSpriteAll(x, y, spriteSet, true);
 	bool prop = false;
 	if (sprites[x][y].type > FIVE && useProp)
 	{
@@ -194,7 +196,7 @@ void Game::EliminateSprite1(Sprite* sprite1, Sprite* sprite2)
 			{
 				if (sprites[i][j].type == rType)
 				{
-					sprites[i][j].type = (type == ALL_X || type == ALL_Y) ? ((rand() % 2 == 0) ? ALL_X : ALL_Y) : type;
+					sprites[i][j].type = (type == ALL_X || type == ALL_Y) ? ((csRandom->next(0, 2) == 0) ? ALL_X : ALL_Y) : type;
 					spriteSet.insert(&sprites[i][j]);
 				}
 			}
@@ -274,7 +276,7 @@ void Game::EliminateSprite2(Sprite* sprite1, Sprite* sprite2)
 	int x = sprite1->type <= FIVE ? sprite1->x : sprite2->x;
 	int y = sprite1->type <= FIVE ? sprite1->y : sprite2->y;
 	SpriteSet spriteSet1;
-	findEliminateSpriteAll(x, y, spriteSet1);
+	findEliminateSpriteAll(x, y, spriteSet1, true);
 	SpriteSet spriteSet2;
 	if (sprite1->type > FIVE)
 	{
@@ -326,7 +328,7 @@ bool Game::EliminateSprite3(Sprite* sprite1, Sprite* sprite2)
 {
 	bool flag = false;
 	SpriteSet spriteSet1;
-	findEliminateSpriteAll(sprite1->x, sprite1->y, spriteSet1);
+	findEliminateSpriteAll(sprite1->x, sprite1->y, spriteSet1, true);
 	if (spriteSet1.size() > 0)
 	{
 		flag = true;
@@ -353,7 +355,7 @@ bool Game::EliminateSprite3(Sprite* sprite1, Sprite* sprite2)
 	}
 
 	SpriteSet spriteSet2;
-	findEliminateSpriteAll(sprite2->x, sprite2->y, spriteSet2);
+	findEliminateSpriteAll(sprite2->x, sprite2->y, spriteSet2, true);
 	if (spriteSet2.size() > 0)
 	{
 		flag = true;
@@ -451,7 +453,7 @@ bool Game::swapSprite(int a, int b)
 	}
 }
 //收集周围能消除的元素
-void Game::findEliminateSpriteAll(int x, int y, SpriteSet& spriteSet)
+void Game::findEliminateSpriteAll(int x, int y, SpriteSet& spriteSet, bool recursion)
 {
 	bool flag_x = canEliminateX(x, y);
 	bool flag_y = canEliminateY(x, y);
@@ -467,6 +469,16 @@ void Game::findEliminateSpriteAll(int x, int y, SpriteSet& spriteSet)
 	if (flag_xy)
 	{
 		findEliminateSpriteXY(x, y, spriteSet);
+	}
+	if (!recursion)
+	{
+		return;
+	}
+	SpriteSet::iterator it;
+	for (it = spriteSet.begin(); it != spriteSet.end(); it++)
+	{
+		Sprite* sprite = *it;
+		findEliminateSpriteAll(sprite->x, sprite->y, spriteSet, false);
 	}
 }
 //收集田字元素
@@ -686,7 +698,7 @@ bool Game::canEliminateX(int x, int y)
 SpriteType Game::tryEliminate(int x, int y)
 {
 	SpriteSet spriteSet;
-	findEliminateSpriteAll(x, y, spriteSet);
+	findEliminateSpriteAll(x, y, spriteSet, true);
 	if (spriteSet.size() == 0)
 	{
 		return ZERO;
@@ -695,26 +707,31 @@ SpriteType Game::tryEliminate(int x, int y)
 }
 bool Game::EliminateSprite(SpriteSet& spriteSet)
 {
-	SpriteSet sortSet;
+	std::set<Sprite> sortSet;
 	bool flag = false;
 	SpriteSet::iterator it;
 	for (it = spriteSet.begin(); it != spriteSet.end(); it++)
 	{
 		Sprite* sprite = *it;
 		SpriteType type = tryEliminate(sprite->x, sprite->y);
-		sortSet.insert(new Sprite(type, sprite->x, sprite->y));
+		sortSet.insert(Sprite(type, sprite->x, sprite->y));
 	}
-	for (it = sortSet.begin(); it != sortSet.end(); it++)
+	std::set<Sprite>::iterator it2;
+	for (it2 = sortSet.begin(); it2 != sortSet.end(); it2++)
 	{
-		Sprite* sprite = *it;
-		if (EliminateSprite(sprite->x, sprite->y, false, randomType()))
+		Sprite sprite = *it2;
+		if (sprites[sprite.x][sprite.y].type == ZERO)
+		{
+			continue;
+		}
+		if (EliminateSprite(sprite.x, sprite.y, false, randomType()))
 		{
 			flag = true;
 		}
-		delete sprite;
 	}
 	return flag;
 }
+
 //元素下落
 void Game::moveSprite()
 {
@@ -1188,7 +1205,7 @@ Sprite* Game::getRightSprite(int x, int y)
 
 SpriteType Game::randomType()
 {
-	int number = rand() % FIVE + 1;
+	int number = csRandom->next(0, FIVE) + 1;
 	return (SpriteType)number;
 }
 
@@ -1233,7 +1250,7 @@ SpriteType Game::randomWightType()
 		maxWeight += it->second;
 	}
 	int sumWeight = 0;
-	int number = rand() % maxWeight;
+	int number = csRandom->next(0, maxWeight);
 	for (it = spriteTypeCount.begin(); it != spriteTypeCount.end(); it++)
 	{
 		int addWight = it->second;
@@ -1282,7 +1299,7 @@ void printColor(SpriteType type) {
 
 void Game::print() const
 {
-	cout << endl << "当前分数: " << score << endl;
+	cout << endl << "当前分数: " << score << ",seed:" << seed << endl;
 	for (int i = 0; i < _X; i++)
 	{
 		cout << endl;

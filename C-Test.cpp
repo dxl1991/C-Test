@@ -150,17 +150,31 @@ void test2() {
 	printf("p=%d,pp=%d,l=%d,i=%d\n", p,pp,l,i);
 }
 
-int main()
+void eliminateMain() {
+	/*std::set<Sprite> spriteSet;
+spriteSet.insert(Sprite(FIVE, 1, 1));
+spriteSet.insert(Sprite(ZERO, 3, 2));
+spriteSet.insert(Sprite(FIVE, 1, 3));
+spriteSet.insert(Sprite(ZERO, 1, 4));
+spriteSet.insert(Sprite(ALL, 2, 5));
+spriteSet.insert(Sprite(ALL_X, 1, 6));
+spriteSet.insert(Sprite(ALL_Y, 1, 7));
+spriteSet.insert(Sprite(ALL, 1, 8));
+std::set<Sprite>::iterator it;
+for (it = spriteSet.begin(); it != spriteSet.end(); it++)
 {
-	//testLine();
-	//TestMap testMap;
-	//testMap.testMap();
-	//example1();
-	//testString();
-	//TestThread testThread;
-	//testThread.test1();
-	//testRefrence();
-	//test2();
+	Sprite sprite = *it;
+	cout <<sprite.x<< "," << sprite.y << "," << sprite.type << endl;
+}*/
+
+/*CSRandom csRandom;
+for (int i=0;i<20;i++)
+{
+	int temp = csRandom.next(0, 5) + 1;
+	cout << temp << ",";
+}
+cout << endl;*/
+
 	int x, y;
 	cout << "请输入棋盘行数:" << endl;
 	cin >> x;
@@ -177,30 +191,31 @@ int main()
 		time_t startTime = time(NULL);
 		int a, b, temp;
 		temp = count;
-		Game game(x,y);
+		Game game(x, y);
 		while (count > 0)
 		{
 			count--;
 			game.findSuggest(a, b);
-			cout << "第"<< temp - count<<"次交换坐标：" << a << "," << b << endl;
+			cout << "第" << temp - count << "次交换坐标：" << a << "," << b << endl;
 			if (game.swapSprite(a, b))
 			{
 				game.checknoEliminate();
 			}
 		}
 		time_t endTime = time(NULL);
-		cout << "棋盘大小："<<x<<","<<y<<" 一共交换了" << temp << "次元素,获得积分:" << game.score <<",消耗时间："<<endTime - startTime<<"秒"<< endl;
+		cout << "棋盘大小：" << x << "," << y << " 一共交换了" << temp << "次元素,获得积分:" << game.score << ",消耗时间：" << endTime - startTime << "秒" << endl;
 		game.printPropStatistics();
 		getchar();
 	}
-	else 
+	else
 	{
-		int a, b, c, d;
+		int a, b, c, d, e = 0;
 		Game game(x, y);
 		while (true)
 		{
 			cout << endl;
 			game.findSuggest(c, d);
+			cout << "已交换次数：" << e << endl;
 			cout << "交换建议：" << c << "," << d << endl;
 			cout << "请输入第一个坐标:" << endl;
 			cin >> a;
@@ -209,9 +224,25 @@ int main()
 			if (game.swapSprite(a, b))
 			{
 				game.checknoEliminate();
+				e++;
 			}
 		}
 	}
+	getchar();
+}
+
+int main()
+{
+	//testLine();
+	//TestMap testMap;
+	//testMap.testMap();
+	//example1();
+	//testString();
+	//TestThread testThread;
+	//testThread.test1();
+	//testRefrence();
+	//test2();
+	eliminateMain();
 	getchar();
 }
 

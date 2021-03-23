@@ -140,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="C-Test.cpp" />
+    <ClCompile Include="CSRandom.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Line.cpp" />
     <ClCompile Include="Sprite.cpp" />
@@ -149,6 +150,7 @@
     <ClCompile Include="TestThread.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CSRandom.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Line.h" />
     <ClInclude Include="Sprite.h" />

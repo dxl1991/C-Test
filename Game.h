@@ -2,6 +2,7 @@
 #include <set>
 #include <map>
 #include "Sprite.h"
+#include "CSRandom.h"
 
 typedef std::set<Sprite*> SpriteSet; //类型别名
 const bool forbidPlane = true;
@@ -10,20 +11,22 @@ class Game
 {
 public:
 	Game();
-	Game(int x,int y);
+	Game(int x, int y);
 	~Game();
-	bool swapSprite(int a,int b);
+	bool swapSprite(int a, int b);
 	void checknoEliminate();
-	void findSuggest(int& a,int& b);
+	void findSuggest(int& a, int& b);
 	void printPropStatistics();
 	SpriteType randomType();
 	SpriteType randomWightType();
-    Sprite* NULL_SPRITE = new Sprite();
+	Sprite* NULL_SPRITE = new Sprite();
 	std::map<SpriteType, int> propStatistics;
 	int score;
+	int seed;
 	int _X;
 	int _Y;
 private:
+	CSRandom* csRandom;
 	Sprite** sprites;
 	void print() const; //方法后面跟const，此方法不能修改成员变量的值
 	void printHelpInfo();
@@ -34,11 +37,11 @@ private:
 	Sprite* getDownSprite(int x, int y);
 	Sprite* getLeftSprite(int x, int y);
 	Sprite* getRightSprite(int x, int y);
-	void findEliminateSpriteAll(int x, int y, SpriteSet& spriteSet);
+	void findEliminateSpriteAll(int x, int y, SpriteSet& spriteSet, bool recursion);
 	void findEliminateSprite(int x, int y, SpriteSet& spriteSet, bool directX, int direct);
 	void findEliminateSpriteXY(int x, int y, SpriteSet& spriteSet);
 	void moveSprite();
-	bool EliminateSprite(int x, int y, bool useProp,SpriteType type);
+	bool EliminateSprite(int x, int y, bool useProp, SpriteType type);
 	bool EliminateSprite(SpriteSet& spriteSet);
 	SpriteType generateProp(SpriteSet& spriteSet);
 	void EliminateSprite1(Sprite* sprite1, Sprite* sprite2);
@@ -46,7 +49,7 @@ private:
 	bool EliminateSprite3(Sprite* sprite1, Sprite* sprite2);
 	bool noEliminate();
 	void findPropEliminate(SpriteSet& spriteSet, SpriteType type);
-	SpriteType tryEliminate(int x,int y);
+	SpriteType tryEliminate(int x, int y);
 };
 
 template <typename T>
